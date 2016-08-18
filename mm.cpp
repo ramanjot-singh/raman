@@ -19,8 +19,8 @@ public:
 
 };
 
-int arr2[NO_OF_ATTRIBUTE+1],maximum[NO_OF_ATTRIBUTE+1],minimum[NO_OF_ATTRIBUTE+1],arr3[NO_OF_ATTRIBUTE+1];;
-	
+int leaf=0,arr2[NO_OF_ATTRIBUTE+1],maximum[NO_OF_ATTRIBUTE+1],minimum[NO_OF_ATTRIBUTE+1],arr3[NO_OF_ATTRIBUTE+1],split_arr[NO_OF_ATTRIBUTE];
+int file_size=0;	
 	
 // slpit function to convert string to int 
 void split(string lines){
@@ -58,16 +58,79 @@ int test_func(attrNode *test_node){
 	
 }
 
+void fill2dArray(int array[][NO_OF_ATTRIBUTE+1], int size, int& numberUsed,char* argv[])
+{
+	ifstream recordsFile;
+	int index1=0, index2=0;
+	
+	recordsFile.open(argv[1]);
+	int i=0;
+	while (i<2){
+        	int var ;
+			recordsFile>>var;
+			i++;
+		}
+		
+	while ((index1 < size) && (!recordsFile.eof()))
+	{	
+	    for (index1 = 0; index1 < size; index1 = index1 + 1){
+		
+	    	for(index2 = 0; index2 < NO_OF_ATTRIBUTE+1; index2 = index2 + 1){
+	    		
+			
+				recordsFile >> array[index1][index2];
+				
+			}
+		}
+	}
+	numberUsed = index1;
+	recordsFile.close();
+}
+
+void print2dArray(const int array[][NO_OF_ATTRIBUTE+1], int numberUsed)
+{
+	int index1=0, index2=0;
+	
+	for (index1 = 0; index1 < numberUsed; index1 = index1 + 1)
+	{
+	    for (index2 = 0; index2 < NO_OF_ATTRIBUTE+1; index2 = index2 + 1)
+	        cout << array[index1][index2] << "   ";
+			
+			cout <<endl;
+	}
+}
+
+void max_min_func(int array[][NO_OF_ATTRIBUTE+1],int size){
+	for (int i=0;i<NO_OF_ATTRIBUTE+1;i++){
+		int maxi =array[0][i];
+		int mini=array[0][i];
+		for (int j=0;j<size;j++){
+			if (array[j][i]>=maxi){
+				maxi=array[j][i];
+			}
+			if (array[j][i]<=mini){
+				mini=array[j][i];
+			}
+		}
+		maximum[i]=maxi;
+		minimum[i]=mini;
+		//cout <<mini<<"    ";
+		
+	}
+} 
+
+
 // Information gain calculator
 
 int information_gain(int attribute_arr[NO_OF_ATTRIBUTE],vector<string> examples){
 	
 	
-
+	//fill_n(maximum,NO_OF_ATTRIBUTE+1, 0);
+	//fill_n(minimum,NO_OF_ATTRIBUTE+1, 0);
 	double pos_class,neg_class,value_count;
 	double entropy;
 
-	for(int i=0;i<examples.size()-2;i++){
+	for(int i=0;i<examples.size();i++){
 
 		string arr[NO_OF_ATTRIBUTE+1];
 		int arr1[NO_OF_ATTRIBUTE+1];
@@ -90,29 +153,29 @@ int information_gain(int attribute_arr[NO_OF_ATTRIBUTE],vector<string> examples)
 	
 	entropy = (-1)*(pos_class/(neg_class+pos_class))*(log2(pos_class/(neg_class+pos_class))) + (-1)*(neg_class/(neg_class+pos_class))*(log2(neg_class/(neg_class+pos_class)));
 	//-----cout<<"parent entropy"<<entropy<<endl;
-	string arr[NO_OF_ATTRIBUTE+1];
+	//string arr[NO_OF_ATTRIBUTE+1];
 	
-	stringstream ssin(examples[examples.size()-2]);
-	int j=0;
-	while ( j < NO_OF_ATTRIBUTE+1){
-    	ssin >> arr[j];
-    	maximum[j] = atoi(arr[j].c_str());      				
-    
-		j++;
-    	
-   	}
-   	
-	stringstream ssin2(examples[examples.size()-1]);
-	j=0;
-	
-	while ( j < NO_OF_ATTRIBUTE+1){
-       	ssin2 >> arr[j];
-    	minimum[j] = atoi(arr[j].c_str());      				
-    	j++;
-   	}
+//	stringstream ssin(examples[examples.size()-2]);
+//	int j=0;
+//	while ( j < NO_OF_ATTRIBUTE+1){
+//    	ssin >> arr[j];
+//    	maximum[j] = atoi(arr[j].c_str());      				
+//    
+//		j++;
+//		
+//   	}
+//   	
+//	stringstream ssin2(examples[examples.size()-1]);
+//	j=0;
+//	
+//	while ( j < NO_OF_ATTRIBUTE+1){
+//       	ssin2 >> arr[j];
+//    	minimum[j] = atoi(arr[j].c_str());      				
+//    	j++;
+//   	}
 	
 	double IG,maximum_IG=0,index_IG=0;
-
+	
 	for (int i=0;i<NO_OF_ATTRIBUTE;i++){
 	
 		if (attribute_arr[i]==1)
@@ -124,7 +187,7 @@ int information_gain(int attribute_arr[NO_OF_ATTRIBUTE],vector<string> examples)
 		int pos_value[maximum[i]-minimum[i]+1],neg_value[maximum[i]-minimum[i]+1];
 		fill_n(pos_value,maximum[i]-minimum[i]+1, 0);
 		fill_n(neg_value,maximum[i]-minimum[i]+1, 0);
-		for (int j=0;j<examples.size()-2;j++){
+		for (int j=0;j<examples.size();j++){
 
 				//int row[NO_OF_ATTRIBUTE+1];
 				split(examples[j]);
@@ -197,11 +260,12 @@ int information_gain(int attribute_arr[NO_OF_ATTRIBUTE],vector<string> examples)
 
 // ID3 implementation
 attrNode *id3(vector<string> examples,char taget_attribute, int attribute_arr[NO_OF_ATTRIBUTE]){
+	cout <<"asdad"<<endl;
 	attrNode *Root = new attrNode();
 	int pos_count=0,neg_count=0;
 	//--------cout<<"examples size"<<examples.size()-2<<endl;
-
-	for (int i=0; i<examples.size()-2;i++){
+	//cout <<examples[100]<<endl;
+	for (int i=0; i<examples.size();i++){
 		string arr[NO_OF_ATTRIBUTE+1];
 		int arr1[NO_OF_ATTRIBUTE+1];
    		int j = 0;
@@ -223,26 +287,28 @@ attrNode *id3(vector<string> examples,char taget_attribute, int attribute_arr[NO
 	}
 	
 		
-	//----cout <<"13 "<<"pos_count "<<pos_count<<" neg count "<<neg_count<<endl;
-	if (pos_count==(examples.size()-2)||neg_count==(examples.size()-2)){
+	cout <<"13 "<<"pos_count "<<pos_count<<" neg count "<<neg_count<<endl;
+	if (pos_count==(examples.size())||neg_count==(examples.size())){
 
-		if (pos_count==(examples.size()-2)){	
+		if (pos_count==(examples.size())){	
+			leaf++;
 			Root->attribute=-1;
 			return Root;
 		}
-		if(neg_count==(examples.size()-2)){
-	//		cout<<"12"<<endl;
+		if(neg_count==(examples.size())){
+			cout<<"12"<<endl;
+			leaf++;
 			Root->attribute=-2;
 			return Root;
 			
 		} 
-		//cout<<"13"<<endl;
+		cout<<"13"<<endl;
 	}
 	else{
 		int majority_pos=0,majority_neg=0;
 		
-		for (int i=0;i<examples.size()-2;i++){
-			//cout<<"5"<<endl;
+		for (int i=0;i<examples.size();i++){
+			//cout<<"5"<<"  ";
 			split(examples[i]);
 			if (arr2[NO_OF_ATTRIBUTE]==1){
 				majority_pos++;
@@ -261,16 +327,18 @@ attrNode *id3(vector<string> examples,char taget_attribute, int attribute_arr[NO
 			}
 		}
 		if (count==NO_OF_ATTRIBUTE){
+			leaf++;
 			Root->attribute = (majority_neg>=majority_pos)?-2:-1;
 			return Root;
 		}
+		
 		int IG = information_gain(attribute_arr,examples);
-		
-		
+		cout <<"31213"<<endl;
+		cout <<IG<<endl;
 		//attribute_arr[IG]=1;
 		
 		Root->attribute = IG;
-	
+		split_arr[IG]++;
 
 		int no_of_values = maximum[Root->attribute]-minimum[Root->attribute]+1;
 		//----cout << "[][]"<<no_of_values<<endl;
@@ -288,7 +356,7 @@ attrNode *id3(vector<string> examples,char taget_attribute, int attribute_arr[NO
 			//attrNode *node_v = new attrNode();
 			//Root->vec.push_back(node_v);
 
-			for (int j=0;j<examples.size()-2;j++){
+			for (int j=0;j<examples.size();j++){
 					//cout<<"3"<<endl;
 					split(examples[j]);
 					if (minimum[Root->attribute]==0){
@@ -308,10 +376,10 @@ attrNode *id3(vector<string> examples,char taget_attribute, int attribute_arr[NO
 					
 			}
 
-			examples_v.push_back(examples[examples.size()-2]);
-			examples_v.push_back(examples[examples.size()-1]);
+			//examples_v.push_back(examples[examples.size()-2]);
+			//examples_v.push_back(examples[examples.size()-1]);
 			//----cout<<"examples_v "<<examples_v.size()-2<<endl;
-			if (examples_v.size()-2==0){
+			if (examples_v.size()==0){
 		
 				attrNode *node_v = new attrNode();
 				node_v->attribute = (majority_neg>=majority_pos)?-2:-1;
@@ -346,44 +414,66 @@ attrNode *id3(vector<string> examples,char taget_attribute, int attribute_arr[NO
 		
 }
 
-int main(){
-	fill_n(maximum,NO_OF_ATTRIBUTE+1, 0);
-	fill_n(minimum,NO_OF_ATTRIBUTE+1, 0);
+int main(int argc, char *argv[]){
+
+	
 	string line;
 	int i=0;
+	string no_of_rows;
+	int n_rows;
+	vector<string> data_vec;
 	vector<string> examples;
+	vector<string> test_examples;
 	// Training file read
-	ifstream myfile ("train_set.txt");
+	ifstream myfile (argv[1]);
   	if (myfile.is_open())
-  	{
-    	while ( getline (myfile,line) )
+  	{	
+  		if (getline(myfile,line)){
+  			no_of_rows = line;	
+		  }
+  		n_rows = atoi(no_of_rows.c_str());
+		if (getline(myfile,line)){
+			string ns = line;	
+		}
+			  
+    	while ( getline (myfile,line))
     	{
-      		examples.push_back(line);
-      		
-    		i++;
+      		data_vec.push_back(line);
     	}
 
     	myfile.close();
   	}
+	
+	// shuffle
+//	for (int k = 0; k < data_vec.size(); k++) {
+//	    int r = k + rand() % (data_vec.size() - k); // careful here!
+//	//    cout <<r<<"  ";
+//	    swap(data_vec[k], data_vec[r]);
+//	}
+// 
+ 	for (int i=0;i<1000;i++){
+ 		examples.push_back(data_vec[i]);
+	 }
+	
+	for (int i=1000;i<data_vec.size();i++){
+		test_examples.push_back(data_vec[i]);
+	}
+	
+	cout <<"sdf "<<data_vec.size()<<endl;
+	int records[n_rows][NO_OF_ATTRIBUTE+1], numberUsed;
 
-	ifstream myfile1 ("abc.txt");
-  	if (myfile1.is_open())
-  	{
-  		
-    	while ( getline (myfile1,line) )
-    	{
-      		examples.push_back(line);
-      		
-    		i++;
-    	}
+	fill2dArray(records, n_rows, numberUsed,argv);
+	//max_min_func(records);
+	//print2dArray(records, numberUsed);
+	max_min_func(records,n_rows);
 
-    	myfile1.close();
-  	}
+
 
   	int attribute_arr[NO_OF_ATTRIBUTE];
-  	cout <<examples.size()<<endl;
+  	cout <<"s "<<test_examples.size()<<endl;
   	
-  	fill_n(arr2,NO_OF_ATTRIBUTE+1, 0);
+  	
+	fill_n(arr2,NO_OF_ATTRIBUTE+1, 0);
   	fill_n(attribute_arr,NO_OF_ATTRIBUTE, 0);
   	
   	attrNode *parent_root = id3(examples,-1,attribute_arr);
@@ -391,22 +481,8 @@ int main(){
   	//cout <<"end"<<root_node->attribute<<endl;
   	
   	//---TEst set
-  	vector<string> test_examples;
-  	ifstream myfile2 ("1000.txt");
-  	if (myfile2.is_open())
-  	{
-  		
-    	while ( getline (myfile2,line) )
-    	{
-      		test_examples.push_back(line);
-      		
-    		i++;
-    	}
-
-    	myfile2.close();
-  	}
-
-
+  	
+	/*
 	int corr=0, fal=0, total=test_examples.size();
   	for (int i=0;i<test_examples.size();i++){
   		
@@ -430,6 +506,11 @@ int main(){
 	cout <<"true "<<corr<<endl;   	
 	cout << "false "<<fal<<endl;
 	cout <<(double)corr/(double)total<<endl;
+	for (int i=0;i<NO_OF_ATTRIBUTE;i++){
+		cout <<i<<"---- "<<split_arr[i]<<"  ";
+	}
+	
+	*/
 	
 	
 }
